@@ -68,7 +68,7 @@
                                     {% elif key == 'Voz Original' %}
                                     <td>
                                         {% set list1 = dict_item[key].split('/') %}
-                                        {% set my_string = list1[7] ~ '/' + list1[8] %}
+                                        {% set my_string = list1[8] ~ '/' ~ list1[7] %}
                                         <a href="{{ url_for('static', filename=my_string) }}">
                                             <button class="btn btn-sm btn-outline-primary" type="button">
                                                 <span class="me-1"><span class="fa fa-download"></span></span>
