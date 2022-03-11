@@ -65,12 +65,15 @@
                             <label for="pago">Pago al ganador</label>
                             {{ form.valor_pago(class="form-control", value = concursoActual.valor_pago) }}
                         </div>
+                        {% if concursoActual.url_imagen %}
                         <div class="mb-4">
-                            <label for="voz">Sube una imagen para tu concurso</label>
+                            <label for="voz">Imagen del concurso</label>
                             <div class="input-group">
-                                <img src="{{concursoActual.url_imagen}}">                              
+                                <img src="{{concursoActual.url_imagen}}" width=75% height= auto>                              
                             </div>  
                         </div>
+                        {% endif %}
+      
                     </div>
                     <div class="col-lg-4 col-sm-6">
                         <div class="mb-4">

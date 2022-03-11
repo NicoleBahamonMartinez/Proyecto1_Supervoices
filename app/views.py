@@ -151,11 +151,17 @@ def cConcurso():
         valor_pago = request.form.get('valor_pago', '')
         guion_voz = request.form.get('guion_voz', '')
         recomendaciones = request.form.get('recomendaciones', '')
+        user = Concurso(nombre=name, url_concurso=url_concurso, fecha_inicio=fecha_inicio, fecha_fin=fecha_fin, valor_pago=valor_pago,
+                        guion_voz=guion_voz, recomendaciones=recomendaciones, email_admin=current_user.email, fecha_creacion=datetime.now())
         image = request.files['url_imagen']
         filename = secure_filename(image.filename)
-        file_url = os.path.join(app.root_path, 'static/Imagenes_Concursos',filename)
-        image.save(file_url)
-        image_url = '/static/Imagenes_Concursos/'+filename
+        if(filename!=''):
+            file_url = os.path.join(app.root_path, 'static','Imagenes_Concursos',filename)
+            image.save(file_url)
+            image_url = '/static/Imagenes_Concursos/'+filename
+            user.url_imagen=image_url
+
+
         # format
         
         print(name, fecha_fin, fecha_inicio)
@@ -168,9 +174,6 @@ def cConcurso():
 
         # if user_by_email:
         #    msg = 'Error: Ya existe un usuario con este correo!'
-
-        user = Concurso(nombre=name, url_concurso=url_concurso, fecha_inicio=fecha_inicio, fecha_fin=fecha_fin, valor_pago=valor_pago,
-                        guion_voz=guion_voz, recomendaciones=recomendaciones, email_admin=current_user.email, fecha_creacion=datetime.now(),url_imagen=image_url)
         db.session.add(user)
         db.session.commit()
         print('!!!!!!', user.nombre, user.email_admin, user.fecha_creacion,
@@ -182,7 +185,7 @@ def cConcurso():
     else:
         msg = ''
 
-    return render_template('home/concAdm.html', form=form, msg=msg, success=success)
+    return redirect(url_for('concAdm'))
 
 
 # Form to load user voice
