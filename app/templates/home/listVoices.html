@@ -55,7 +55,7 @@
                                     <td>
                                         {% if dict_item[key] %}
                                         {% set list1 = dict_item[key].split('Archivos_Convertidos') %}
-                                        {% set my_string = 'Archivos_Convertidos' ~ list1[2] %}
+                                        {% set my_string = 'Archivos_Convertidos' + list1[2] %}
                                         <a href="{{ url_for('static', filename=my_string) }}">
                                             <button class="btn btn-sm btn-outline-primary" type="button">
                                                 <span class="me-1"><span class="fa fa-download"></span></span>
@@ -68,7 +68,7 @@
                                     {% elif key == 'Voz Original' %}
                                     <td>
                                         {% set list1 = dict_item[key].split('Archivos_Originales') %}
-                                        {% set my_string = 'Archivos_Originales' ~ list1[2] %}
+                                        {% set my_string = 'Archivos_Originales' + list1[2] %}
                                         <a href="{{ url_for('static', filename=my_string) }}">
                                             <button class="btn btn-sm btn-outline-primary" type="button">
                                                 <span class="me-1"><span class="fa fa-download"></span></span>
