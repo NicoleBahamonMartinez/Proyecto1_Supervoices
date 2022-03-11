@@ -65,7 +65,7 @@
                                     </td>
                                     {% elif key == 'Voz Original' %}
                                     <td>
-                                        <a href="{{ url_for('download', filename=dict_item[key]) }}">
+                                        <a href="{{ url_for('static', filename=dict_item[key]) }}">
                                             <button class="btn btn-sm btn-outline-primary" type="button">
                                                 <span class="me-1"><span class="fa fa-download"></span></span>
                                             </button></a>
