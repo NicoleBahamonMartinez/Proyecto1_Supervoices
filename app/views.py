@@ -238,8 +238,9 @@ def crearVozUsuario(concurso, file, voz):
     file_url = os.path.join(
         app.root_path, 'static/Archivos_Originales', filename)
     file.save(file_url)
+    file_url_to_save = os.path.join('Archivos_Originales',filename)
     # Guardar voz
-    voz.url_voz_original = file_url
+    voz.url_voz_original = file_url_to_save
     concurso.voces.append(voz)
     db.session.add(concurso)
     db.session.commit()
