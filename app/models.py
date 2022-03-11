@@ -49,7 +49,7 @@ class Concurso(db.Model):
 	email_admin = db.Column(db.String(100))
 	voces = db.relationship('Voz', backref='concurso',lazy='dynamic')
 		
-	def __init__(self,nombre,url_concurso,fecha_inicio,fecha_fin,fecha_creacion,valor_pago,guion_voz,recomendaciones,email_admin):
+	def __init__(self,nombre,url_concurso,fecha_inicio,fecha_fin,fecha_creacion,valor_pago,guion_voz,recomendaciones,email_admin,url_imagen):
 		self.nombre=nombre
 		self.url_concurso=url_concurso
 		self.fecha_inicio=fecha_inicio
@@ -59,6 +59,7 @@ class Concurso(db.Model):
 		self.guion_voz=guion_voz
 		self.recomendaciones=recomendaciones
 		self.email_admin=email_admin
+		self.url_imagen=url_imagen
 
 
 class Voz(db.Model):

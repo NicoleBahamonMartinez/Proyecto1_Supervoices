@@ -24,7 +24,7 @@ class RegisterForm(FlaskForm):
 class createConcursoForm(FlaskForm):
 	name        = StringField  (u'Nombre', validators=[DataRequired()])
 	url_concurso    = StringField  (u'URL para el concurso')
-	url_imagen = FileField(u'Imagen', validators=[FileAllowed(['mp3', 'ogg','wav'], 'Solo archivos de voz!')])
+	url_imagen = FileField(u'Imagen', validators=[FileAllowed(['jpg', 'jpeg','png'], 'Solo imágenes!')])
 	fecha_inicio = DateTimeField(u'Fecha Inicio',id="fecha_inicio" ,format='%Y/%m/%d', validators=[DataRequired()])
 	fecha_fin = DateTimeField(u'Fecha Fin', format='%Y/%m/%d',validators=[DataRequired()])
 	valor_pago = DecimalField(u'Valor a pagar', validators=[DataRequired()])

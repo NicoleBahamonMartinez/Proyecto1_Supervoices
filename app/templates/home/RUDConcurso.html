@@ -68,8 +68,7 @@
                         <div class="mb-4">
                             <label for="voz">Sube una imagen para tu concurso</label>
                             <div class="input-group">
-                                <span class="input-group-text" id="basic-addon1"><span class="fas fa-file-archive"></span></span>
-                                {{ form.url_imagen(class="form-control" , value = concursoActual.url_imagen) }}                              
+                                <img src="{{concursoActual.url_imagen}}">                              
                             </div>  
                         </div>
                     </div>
