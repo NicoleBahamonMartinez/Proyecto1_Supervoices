@@ -55,7 +55,7 @@
                                     <td>
                                         {% if dict_item[key] %}
                                         {% set list1 = dict_item[key].split('/') %}
-                                        {% set my_string = list1[list1|length] %}
+                                        {% set my_string = list1|length %}
                                         <a href="{{ url_for('static', filename=my_string) }}">
                                             <button class="btn btn-sm btn-outline-primary" type="button">
                                                 <span class="me-1"><span class="fa fa-download"></span></span>
