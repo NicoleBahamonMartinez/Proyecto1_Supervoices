@@ -1,6 +1,8 @@
 flask/
+app/static/Imagenes_Concursos
 app/static/Archivos_Convertidos/
 app/static/Archivos_Originales/
+app/config.py
 voices_project/
 *.pyc
 dev
