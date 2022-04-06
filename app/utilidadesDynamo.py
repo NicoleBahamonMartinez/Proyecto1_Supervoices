@@ -29,6 +29,13 @@ def traerUUIDConcurso(urlConcurso):
     if len(items) > 0:
         return items[0]["PK"].replace("CON#","")
 
+def traerConcursosUsuario(email_admin):
+    response = TABLE.scan(
+        FilterExpression=Attr('email_admin').eq(email_admin)
+    )
+    items = response['Items']
+    return items
+
 def traerInfoConcurso(urlConcurso):
     uid = traerUUIDConcurso(urlConcurso)
     pk = 'CON#{}'.format(uid)
@@ -66,6 +73,29 @@ def actualizarConcurso(uid,nombre,url_imagen,url_concurso,fecha_inicio,fecha_fin
         ':guion_voz':guion_voz,
         ':recomendaciones':recomendaciones,
         ':email_admin':email_admin
+    },
+    ReturnValues="ALL_NEW"
+    )
+    return updatedElement
+
+def actualizarConcursoForm(uid,nombre,url_concurso,fecha_inicio,fecha_fin,valor_pago,guion_voz,recomendaciones):
+    pk = 'CON#{}'.format(uid)
+    sk = 'METADATA#{}'.format(uid)
+
+    updatedElement = TABLE.update_item(
+    Key={
+        'PK': pk,
+        'SK': sk
+    },
+    UpdateExpression='SET nombre = :nombre,url_concurso = :url_concurso,fecha_inicio = :fecha_inicio,fecha_fin = :fecha_fin,valor_pago = :valor_pago,guion_voz = :guion_voz,recomendaciones = :recomendaciones',
+    ExpressionAttributeValues={
+        ':nombre': nombre,
+        ':url_concurso':url_concurso,
+        ':fecha_inicio':fecha_inicio,
+        ':fecha_fin':fecha_fin,
+        ':valor_pago':valor_pago,
+        ':guion_voz':guion_voz,
+        ':recomendaciones':recomendaciones
     },
     ReturnValues="ALL_NEW"
     )

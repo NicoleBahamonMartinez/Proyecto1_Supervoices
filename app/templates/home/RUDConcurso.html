@@ -16,7 +16,7 @@
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-12 col-md-8 text-center">
-                    <h1 class="display-3 mb-4">Concurso:  {{concursoActual.nombre}} </h1>
+                    <h1 class="display-3 mb-4">Concurso:  {{concursoActual["nombre"]}} </h1>
                 </div>
             </div>
         </div>
@@ -30,7 +30,7 @@
                     <div class="col-lg-4 col-sm-6">
                         <div class="mb-4">
                             {{ form.name.label() }}
-                            {{ form.name(class="form-control", value = concursoActual.nombre) }}
+                            {{ form.name(class="form-control", value = concursoActual["nombre"]) }}
                         </div>
                         <div class="mb-4">
                             {{ form.fecha_inicio.label() }}
@@ -38,7 +38,7 @@
                                 <div class="input-group input-group-border">
                                     <span class="input-group-text" id="basic-addonDate2"><span
                                             class="fas far fa-calendar-alt"></span></span>
-                                    {{ form.fecha_inicio(class='form-control',placeholder='YYYY/MM/DD' , value = concursoActual.fecha_inicio)}}
+                                    {{ form.fecha_inicio(class='form-control',placeholder='YYYY/MM/DD' , value = concursoActual["fecha_inicio"])}}
                                     </div>
                             </div>
                         </div>
@@ -48,7 +48,7 @@
                                 <div class="input-group input-group-border">
                                     <span class="input-group-text" id="basic-addonDate2"><span
                                             class="fas far fa-calendar-alt"></span></span>
-                                    {{ form.fecha_fin(class='form-control',placeholder='YYYY/MM/DD', value = concursoActual.fecha_fin) }}
+                                    {{ form.fecha_fin(class='form-control',placeholder='YYYY/MM/DD', value = concursoActual["fecha_fin"]) }}
                                     </div>
                             </div>
                         </div>
@@ -58,18 +58,18 @@
                             <label for="email">URL Deseada</label>
                             <div class="input-group">
                                 <span class="input-group-text" id="basic-addon1"><span class="fas fa-mail-bulk"></span></span>
-                                {{ form.url_concurso(class="form-control", value = concursoActual.url_concurso) }}
+                                {{ form.url_concurso(class="form-control", value = concursoActual["url_concurso"]) }}
                             </div>  
                         </div>
                         <div class="mb-4">
                             <label for="pago">Pago al ganador</label>
-                            {{ form.valor_pago(class="form-control", value = concursoActual.valor_pago) }}
+                            {{ form.valor_pago(class="form-control", value = concursoActual["valor_pago"]) }}
                         </div>
-                        {% if concursoActual.url_imagen %}
+                        {% if concursoActual["url_imagen"] %}
                         <div class="mb-4">
                             <label for="voz">Imagen del concurso</label>
                             <div class="input-group">
-                                <img src="{{concursoActual.url_imagen}}" width=75% height= auto>                              
+                                <img src="{{concursoActual['url_imagen']}}" width=75% height= auto>                              
                             </div>  
                         </div>
                         {% endif %}
@@ -80,14 +80,14 @@
                             <label for="email">Guión</label>
                             <div class="input-group">
                                 <span class="input-group-text" id="basic-addon1"><span class="fas fa-notes-medical"></span></span>
-                                {{ form.guion_voz(class="form-control", value = concursoActual.guion_voz) }}
+                                {{ form.guion_voz(class="form-control", value = concursoActual["guion_voz"]) }}
                             </div>  
                         </div>
                         <div class="mb-4">
                             <label for="email">Recomendaciones</label>
                             <div class="input-group">
                                 <span class="input-group-text" id="basic-addon1"><span class="fas fa-notes-medical"></span></span>
-                                {{ form.recomendaciones(class="form-control", value = concursoActual.recomendaciones) }}
+                                {{ form.recomendaciones(class="form-control", value = concursoActual["recomendaciones"]) }}
                             </div>  
                         </div>
                     </div>

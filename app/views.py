@@ -24,6 +24,7 @@ from werkzeug.utils import secure_filename
 from app import app, lm, db, bc
 from app.models import Concurso, Users, UsuarioAdmin, Voz
 from app.forms import LoginForm, RegisterForm, createConcursoForm, createVozForm, updateConcursoForm
+from app.utilidadesDynamo import *
 
 # App schemas
 
@@ -151,35 +152,19 @@ def cConcurso():
         valor_pago = request.form.get('valor_pago', '')
         guion_voz = request.form.get('guion_voz', '')
         recomendaciones = request.form.get('recomendaciones', '')
-        user = Concurso(nombre=name, url_concurso=url_concurso, fecha_inicio=fecha_inicio, fecha_fin=fecha_fin, valor_pago=valor_pago,
-                        guion_voz=guion_voz, recomendaciones=recomendaciones, email_admin=current_user.email, fecha_creacion=datetime.now())
         image = request.files['url_imagen']
         filename = secure_filename(image.filename)
+        image_url = ''
         if(filename!=''):
             file_url = os.path.join(app.root_path, 'static','Imagenes_Concursos',filename)
             image.save(file_url)
             image_url = '/static/Imagenes_Concursos/'+filename
-            user.url_imagen=image_url
-
-
-        # format
         
-        print(name, fecha_fin, fecha_inicio)
-    # convert from string format to datetime format
-    
-        print(type(fecha_inicio))
+        # Insertar concurso en base de datos de Dynamo
+        response = insertarConcurso(nombre=name, url_imagen = image_url,url_concurso=url_concurso, fecha_inicio=fecha_inicio, fecha_fin=fecha_fin, valor_pago=valor_pago,
+                        guion_voz=guion_voz, recomendaciones=recomendaciones, email_admin=current_user.email, fecha_creacion=datetime.now().strftime('%Y-%m-%d-%H:%M:%S'))
 
-        # filter User out of database through username
-        # user_by_email = Concurso.query.filter_by(email=email).first()
-
-        # if user_by_email:
-        #    msg = 'Error: Ya existe un usuario con este correo!'
-        db.session.add(user)
-        db.session.commit()
-        print('!!!!!!', user.nombre, user.email_admin, user.fecha_creacion,
-              user.fecha_fin, user.fecha_inicio, user.guion_voz)
-
-        msg = 'Usuario creado exitosamente'
+        msg = 'Concurso creado exitosamente'
         success = True
 
     else:
@@ -271,21 +256,18 @@ def sitemap():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'sitemap.xml')
 
 def traerConcursos():
-    concursos = Concurso.query.filter_by(email_admin=current_user.email).all()
-    objtemp = concursos_schema.dump(concursos)
-    for s in objtemp:
-        s['ID'] = s.pop('id')
-        s['Nombre'] = s.pop('nombre')
-        s['Fecha de Inicio'] = s.pop('fecha_inicio')
-        s['Fecha de Finalización'] = s.pop('fecha_fin')
-        s['Fecha de Creación'] = s.pop('fecha_creacion')
-        s['Valor pagado al ganador'] = s.pop('valor_pago')
-        s['Url concurso'] = s.pop('url_concurso')
-        s.pop("url_imagen", None)
-        s.pop("guion_voz", None)
-        s.pop("recomendaciones", None)
-        s.pop("email_admin", None)
-
+    concursos = traerConcursosUsuario(email_admin = current_user.email)
+    objtemp = []
+    for concurso in concursos:
+        s = {}
+        s['ID'] = concurso['PK']
+        s['Nombre'] = concurso['nombre']
+        s['Fecha de Inicio'] = concurso['fecha_inicio']
+        s['Fecha de Finalización'] = concurso['fecha_fin']
+        s['Fecha de Creación'] = concurso['fecha_creacion']
+        s['Valor pagado al ganador'] = concurso['valor_pago']
+        s['Url concurso'] = concurso['url_concurso']
+        objtemp.append(s)
     return objtemp
 
 
@@ -354,7 +336,7 @@ def RUDConcurso():
     return render_template('home/RUDConcurso.html', )
 
 
-# Form to load user voice
+# Ver datos concurso
 @app.route('/RUDConcurso.html/<urlConcurso>', methods=['GET', 'POST'])
 def verConcurso(urlConcurso):
 
@@ -364,50 +346,49 @@ def verConcurso(urlConcurso):
     success = False
 
     if request.method == 'GET':
-        concurso = Concurso.query.filter_by(url_concurso=urlConcurso).first()
+        concurso = traerInfoConcurso(urlConcurso)
         if concurso:
             if (not current_user.is_authenticated):
                 return render_template('login')
-        print(concurso.recomendaciones)
         return render_template('home/RUDConcurso.html', concursoActual=concurso, form=form, msg=msg)
 
     if request.method == 'POST':
-        concurso = Concurso.query.filter_by(url_concurso=urlConcurso).first()
+        uidConcurso = traerUUIDConcurso(urlConcurso)
+        nombre = ""
+        url_concurso = ""
+        fecha_inicio = ""
+        fecha_fin = ""
+        valor_pago = ""
+        guion_voz = ""
+        recomendaciones = ""
         format = '%Y/%m/%d'
+
+        # Obtener valores del form
         if 'name' in request.form:
-            concurso.nombre = request.form.get('name', '', type=str)
-
+            nombre = request.form.get('name', '', type=str)
         if 'url_concurso' in request.form:
-            concurso.url_concurso = request.form.get('url_concurso', '', type=str)
-
+            url_concurso = request.form.get('url_concurso', '', type=str)
         if 'fecha_inicio' in request.form:
-            concurso.fecha_inicio =  request.form.get('fecha_inicio', '')
-
+            fecha_inicio =  request.form.get('fecha_inicio', '')
         if 'fecha_fin' in request.form:
-            concurso.fecha_fin = request.form.get('fecha_fin', '')
-
+            fecha_fin = request.form.get('fecha_fin', '')
         if 'valor_pago' in request.form:
-            concurso.valor_pago = request.form.get('valor_pago', '')
-       
+            valor_pago = request.form.get('valor_pago', '')
         if 'guion_voz' in request.form:
-            concurso.guion_voz = request.form.get('guion_voz', '')
-
+            guion_voz = request.form.get('guion_voz', '')
         if 'recomendaciones' in request.form:
-            concurso.recomendaciones = request.form.get('recomendaciones', '')
+            recomendaciones = request.form.get('recomendaciones', '')
         
-        db.session.commit()
-    
-        print('!!!!!!', concurso.nombre)
+        # Actualizar concurso en Dynamo
+        responseUpdate = actualizarConcursoForm(uidConcurso,nombre,url_concurso,fecha_inicio,fecha_fin,valor_pago,guion_voz,recomendaciones)
 
         msg = 'Concurso actualizado exitosamente'
         success = True
-
 
     return redirect(url_for('concAdm'))
 
 @app.route('/deleteConcurso/<urlConcurso>')
 def deleteConcurso(urlConcurso):
-    concurso =  Concurso.query.filter_by(url_concurso=urlConcurso).first()
-    db.session.delete(concurso)
-    db.session.commit()
+    uidConcurso = traerUUIDConcurso(urlConcurso)
+    eliminarConcurso(uidConcurso)
     return redirect(url_for('concAdm'))
