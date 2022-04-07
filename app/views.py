@@ -176,38 +176,27 @@ def cConcurso():
 # Form to load user voice
 @app.route('/concursos/<urlConcurso>/ingresarVoz', methods=['GET', 'POST'])
 def ingresarVoz(urlConcurso):
-    concurso = Concurso.query.filter_by(url_concurso=urlConcurso).first()
-    if concurso:
+    uidConcurso = traerUUIDConcurso(urlConcurso)
+    if uidConcurso:
         # declare the Registration Form
-
         form = createVozForm(request.form)
 
         msg = None
         success = False
 
         if request.method == 'GET':
-
             return render_template('home/cVoices.html', form=form, msg=msg)
-
-            # check if both http method is POST and form is valid on submit
         if request.method == 'POST':
             # assign form data to variables
             name = request.form.get('name', '', type=str)
             lastname = request.form.get('lastname', '', type=str)
             email = request.form.get('email', '', type=str)
             observaciones = request.form.get('observaciones', ' ', type=str)
-            print("request.files")
             file = request.files['profile']
-            print(request.files['profile'])
+            file_url = guardarVozUsuario(file)
+            response = insertarVoz(uidConcurso,email,name,lastname,datetime.now().strftime('%Y-%m-%d-%H:%M:%S'),False,file_url,"",observaciones)
 
-            voz = Voz(email=email, nombre=name, apellido=lastname,
-                      observaciones=observaciones, fecha_creacion=datetime.now(), procesado=0)
-            print(voz.email, voz.nombre, voz.apellido, voz.observaciones,
-                  voz.fecha_creacion, voz.procesado, '!!!!!!!')
-            # crearVozUsuario(concurso,file,voz)
-            # voz.save(concurso,file)
-            crearVozUsuario(concurso, file, voz)
-            msg = 'Usuario creado exitosamente'
+            msg = 'Voz creada exitosamente'
             success = True
 
         else:
@@ -217,21 +206,15 @@ def ingresarVoz(urlConcurso):
     else:
         return render_template('home/page-404.html'), 404
 
-
-def crearVozUsuario(concurso, file, voz):
+def guardarVozUsuario(file):
     filename = secure_filename(file.filename)
     file_url = os.path.join(
         app.root_path, 'static', 'Archivos_Originales', filename)
     file.save(file_url)
     # Guardar voz
-    voz.url_voz_original = file_url
-    concurso.voces.append(voz)
-    db.session.add(concurso)
-    db.session.commit()
+    return file_url
 
 # App main route + generic routing
-
-
 @app.route('/', defaults={'path': 'index.html'})
 @app.route('/<path>')
 def index(path):
@@ -280,45 +263,38 @@ def concAdm():
 # Form to load user voice
 @app.route('/concursos/<urlConcurso>', methods=['GET', 'POST'])
 def verVoces(urlConcurso):
-    concurso = Concurso.query.filter_by(url_concurso=urlConcurso).first()
+    concurso = traerInfoConcurso(urlConcurso)
     if concurso:
         if (not current_user.is_authenticated):
-            return render_template('home/listVoices.html', datos=traerVoces(0,concurso.id),concursoActual=concurso,auth=0)
-        elif (current_user.email!=concurso.email_admin):
-            return render_template('home/listVoices.html', datos=traerVoces(0,concurso.id),concursoActual=concurso,auth=0)
-        return render_template('home/listVoices.html', datos=traerVoces(1,concurso.id),concursoActual=concurso,auth=1)
-        
- 
+            return render_template('home/listVoices.html', datos=traerVoces(0,concurso["PK"]),concursoActual=concurso,auth=0)
+        elif (current_user.email!=concurso["email_admin"]):
+            return render_template('home/listVoices.html', datos=traerVoces(0,concurso["PK"]),concursoActual=concurso,auth=0)
+        return render_template('home/listVoices.html', datos=traerVoces(1,concurso["PK"]),concursoActual=concurso,auth=1)
 
 def traerVoces(b,cId):
     if b:
-        voces = Voz.query.filter_by(concurso_id=cId).order_by(desc(Voz.fecha_creacion)).all()
-        objtemp = voces_schema.dump(voces)
-        for s in objtemp:
-            s['ID']=s.pop('id')
-            s['Email']=s.pop('email')
-            s['Nombre(s)']=s.pop('nombre')
-            s['Apellido(s)']=s.pop('apellido')
-            s['Estado']=s.pop('procesado')
-            s['Fecha de Creación']=s.pop('fecha_creacion')
-            s['Voz Original']=s.pop('url_voz_original')
-            s['Voz procesada']=s.pop('url_voz_convertida')
-            s.pop("observaciones", None)
-            s.pop("concurso_id", None)
+        voces = traerVocesConcurso(cId)
+        objtemp = []
+        for voz in voces:
+            s = {}
+            s['ID']=voz['SK']
+            s['Email']=voz['email']
+            s['Nombre(s)']=voz['nombre']
+            s['Apellido(s)']=voz['apellido']
+            s['Estado']=voz['procesado']
+            s['Fecha de Creación']=voz['fecha_creacion']
+            s['Voz Original']=voz['url_voz_original']
+            s['Voz procesada']=voz['url_voz_convertida']
+            objtemp.append(s)
     else:
-        voces = Voz.query.filter_by(concurso_id=cId,procesado=1).order_by(desc(Voz.fecha_creacion)).all()
-        objtemp = voces_schema.dump(voces)
-        for s in objtemp:
-            s['ID']=s.pop('id')
-            s['Voz procesada']=s.pop('url_voz_convertida')
-            s['Fecha de Creación']=s.pop('fecha_creacion')
-            s.pop("email", None)
-            s.pop("nombre", None)
-            s.pop("apellido", None)
-            s.pop("procesado", None)
-            s.pop("url_voz_original", None)
-            s.pop("observaciones", None)
-            s.pop("concurso_id", None)
+        voces = traerVocesConcurso(cId,True)
+        objtemp = []
+        for voz in voces:
+            s = {}
+            s['ID']=voz['SK']
+            s['Voz procesada']=voz['url_voz_convertida']
+            s['Fecha de Creación']=voz['fecha_creacion']
+            objtemp.append(s)
 
     return objtemp
 

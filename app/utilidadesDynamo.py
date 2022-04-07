@@ -116,15 +116,25 @@ def eliminarConcurso(uid):
 
 # Seccion de voces
 
-def traerVocesConcurso(urlConcurso):
-    uid = traerUUIDConcurso(urlConcurso)
-    pk = 'CON#{}'.format(uid)
+def traerVocesConcurso(uidConcurso,traerSoloProcesados=False):
+    pk = uidConcurso
     sk = 'VOZ#'
-    response = TABLE.query(
-        KeyConditionExpression=Key('PK').eq(pk) & Key('SK').begins_with(sk)
-    )
-    items = response['Items']
-    return items
+    response = None
+    if traerSoloProcesados:
+        response = TABLE.query(
+            KeyConditionExpression=Key('PK').eq(pk) & Key('SK').begins_with(sk),
+            FilterExpression=Attr('procesado').eq(True)
+        )
+    else:
+        response = TABLE.query(
+            KeyConditionExpression=Key('PK').eq(pk) & Key('SK').begins_with(sk)
+        )
+    if response:
+        items = response['Items']
+        itemsSorted = sorted(items, key = lambda diction : datetime.strptime(diction["fecha_creacion"],"%Y-%m-%d-%H:%M:%S"), reverse=True)
+        return items
+    else:
+        return []
 
 def insertarVoz(uidConcurso,email,nombre,apellido,fecha_creacion,procesado,url_voz_original,url_voz_convertida,observaciones):
     uid = str(uuid.uuid4())
